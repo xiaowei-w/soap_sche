@@ -1,12 +1,18 @@
+'use strict';
+
 var jobs = require('../controllers/jobsController')
+var resources = require('../controllers/resourcesController')
+
 
 module.exports = function(app){
     // Main Routes
     app.get('/', function( req, res, next ) {
-        res.render('index', { title: 'Soap Scheduler' });
+        res.render('index', { title: 'Soap Weekly Scheduler' });
     });
  
     app.get('/jobs', jobs.ListAll );
+    
+    app.get('/resources', resources.getResources );
 
     // Fall through
     app.use(function(req, res, next) {

@@ -1,24 +1,12 @@
-/**
- * jobsController
- *
- * @description :: Server-side logic for managing jobs
- * 
- */
-var crontab = require('crontab');
-var cronlist;
+'use strict';
 
-crontab.load(function(err, crontab) {
-  if (err) {
-    return console.error(err);
-  }
-  cronlist = crontab
-});
-
+var tasks = require('../models/cronjobs')();
 
 exports.ListAll = function( req, res, next ) {
-    var jobs = cronlist.jobs();
+    // console.log(tasks.getCronTab());
+    var jobs = tasks.getCronTab().jobs();
     var jobs_str_array = [];
-    for ( idx = 0; idx < jobs.length; idx++ ) {
+    for ( var idx = 0; idx < jobs.length; idx++ ) {
         jobs_str_array[idx] = jobs[idx].render();
     }
 
