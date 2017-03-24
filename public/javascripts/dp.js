@@ -85,7 +85,6 @@ function init() {
     dp.rowHeaderWidth = 100;
     
     getResources(dp);
-
     
     // generate and load events
     // for (var i = 0; i < 1; i++) {
@@ -111,18 +110,28 @@ function init() {
 
     // event creating
     dp.onTimeRangeSelected = function (args) {
-        var name = prompt("New event name:", "Event");
-        dp.clearSelection();
-        if (!name) return;
-        var e = new DayPilot.Event({
-            start: args.start,
-            end: args.end,
-            id: DayPilot.guid(),
-            resource: args.resource,
-            text: name
-        });
-        dp.events.add(e);
-        dp.message("Created");
+        // var name = prompt("New event name:", "Event");
+        // dp.clearSelection();
+        // if (!name) return;
+        // var e = new DayPilot.Event({
+        //     start: args.start,
+        //     end: args.end,
+        //     id: DayPilot.guid(),
+        //     resource: args.resource,
+        //     text: name
+        // });
+        // dp.events.add(e);
+        // dp.message("Created");
+        var modal = new DayPilot.Modal();
+        modal.onClosed = function(args) {
+            dp.clearSelection();
+            // var data = args.result;
+            // if (data && data.result === "OK") { 
+            //     loadEvents(); 
+            //     dp.message(data.message); 
+            // }
+        };
+        modal.showUrl("newjob?start=" + args. start + "&end=" + args.end + "&resource=" + args.resource);
     };
 
     dp.onEventClicked = function(args) {

@@ -1,0 +1,87 @@
+doctype html
+html
+  head
+    link(rel='stylesheet', href='/stylesheets/bootstrap/bootstrap.min.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap-select/bootstrap-select.min.css')
+    script(src='/javascripts/jquery-1.12.2.min.js')
+    script(src='/javascripts/daypilot/daypilot-all.min.js')
+    script(src='/javascripts/bootstrap/bootstrap.min.js')
+    script(src='/javascripts/bootstrap-select/bootstrap-select.min.js')
+  
+  body
+    div.modal-header 
+      button.close
+        span(aria-hidden="true") x
+      h4.modal-title Weekly Job
+      
+    div.modal-body    
+      form(method='POST' action='/register')
+        div.row
+          div.col-xs-3
+            label(for='name') Name
+          div.col-xs-9.pull-right
+            input#name.form-control(type='text', placeholder='Give your job a name' name='name')
+        br
+        div.row
+          div.col-xs-3
+            label Resource
+          div.col-xs-9.pull-right
+            select(class='selectpicker', data-width='fit')
+              each resource in resources
+                option=resource.name
+        br
+        div.row
+          div.col-xs-3
+            label Start Time (Hrs:Mins)
+          div.col-xs-9.pull-right
+            select(class='selectpicker', data-width='fit')
+              - for (var i=0; i < 24; ++i)
+                  if i < 10
+                    option(value=i)="0"+i
+                  else
+                    option(value=i)=i
+            label :
+            select(class='selectpicker', data-width='fit')
+              - for (var i=0; i < 60; ++i)
+                  if i < 10
+                    option(value=i)="0"+i
+                  else
+                    option(value=i)=i
+        br
+        div.row
+          div.col-xs-3
+            label Day of Week
+          div.col-xs-9
+              label(for="checkbox").check-inline
+                input(type="checkbox",value="1")
+                |  Mon &nbsp;
+              label(for="checkbox").check-inline
+                input(type="checkbox",value="2")
+                |  Tue &nbsp;
+              label(for="checkbox").check-inline
+                input(type="checkbox",value="3")
+                |  Wed &nbsp;
+              label(for="checkbox").check-inline
+                input(type="checkbox",value="4")
+                |  Thu &nbsp;
+              label(for="checkbox").check-inline
+                input(type="checkbox",value="5")
+                |  Fri &nbsp;
+              label(for="checkbox").check-inline
+                input(type="checkbox",value="6")
+                |  Sat &nbsp;
+              label(for="checkbox").check-inline
+                input(type="checkbox",value="0")
+                |  Sun
+            
+        br
+        div.row
+          div.col-xs-3
+            label(for='name') Command:
+          div.col-xs-9.pull-right
+            input#name.form-control(type='text', placeholder='Enter your command' name='command')
+
+        div.form-group
+          label(style='display: block') End Time:
+          
+        button.btn.btn-primary(type='submit') Sign up

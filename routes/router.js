@@ -1,18 +1,23 @@
 'use strict';
 
-var jobs = require('../controllers/jobsController')
-var resources = require('../controllers/resourcesController')
-
+var jobsCtrl = require('../controllers/jobsController')
+var resourcesCtrl = require('../controllers/resourcesController')
+var resources = require('../models/resources')()
 
 module.exports = function(app){
     // Main Routes
     app.get('/', function( req, res, next ) {
         res.render('index', { title: 'Soap Weekly Scheduler' });
     });
- 
-    app.get('/jobs', jobs.ListAll );
     
-    app.get('/resources', resources.getResources );
+    app.get('/newjob', function( req, res, next ) {
+        var re = resources.getResourceData();
+        res.render('newjob', { resources: re.resources });
+    });
+
+    app.get('/jobs', jobsCtrl.ListAll );
+    
+    app.get('/resources', resourcesCtrl.getResources );
 
     // Fall through
     app.use(function(req, res, next) {
