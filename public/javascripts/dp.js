@@ -1,4 +1,6 @@
 'use strict'
+var dp = null;
+
 function setCellDim(dp){
     dp.eventHeight = 25;
     dp.headerHeight = 15;
@@ -58,8 +60,12 @@ function getResources(dp) {
     })
 }
 
+function updateRes() {
+    getResources(dp);
+}
+
 function init() {
-    var dp = new DayPilot.Scheduler("dp");
+    dp = new DayPilot.Scheduler("dp");
 
     // Set Cell Dimensions
     setCellDim(dp);
@@ -131,16 +137,16 @@ function init() {
             //     dp.message(data.message); 
             // }
         };
-        modal.showUrl("newjob?start=" + args. start + "&end=" + args.end + "&resource=" + args.resource);
+        modal.showUrl("newjob?start=" + args.start + "&end=" + args.end + "&resource=" + args.resource);
     };
 
-    dp.onEventClicked = function(args) {
-        alert("clicked: " + args.e.id());
-    };
+    // dp.onEventClicked = function(args) {
+    //     alert("clicked: " + args.e.id());
+    // };
 
-    dp.onTimeHeaderClick = function(args) {
-        alert("clicked: " + args.header.start);
-    };
+    // dp.onTimeHeaderClick = function(args) {
+    //     alert("clicked: " + args.header.start);
+    // };
 
     dp.snapToGrid = false;
     dp.useEventBoxes = "Never";
@@ -158,8 +164,7 @@ function init() {
 
 
     dp.onIncludeTimeCell = function(args) {};
-
-
+    dp.rowClickHandling = true;
     dp.init();
 
     // Scroll to Today

@@ -2,7 +2,6 @@
 
 var jobsCtrl = require('../controllers/jobsController')
 var resourcesCtrl = require('../controllers/resourcesController')
-var resources = require('../models/resources')()
 
 module.exports = function(app){
     // Main Routes
@@ -10,11 +9,8 @@ module.exports = function(app){
         res.render('index', { title: 'Soap Weekly Scheduler' });
     });
     
-    app.get('/newjob', function( req, res, next ) {
-        var re = resources.getResourceData();
-        res.render('newjob', { resources: re.resources });
-    });
-
+    app.get('/newjob', jobsCtrl.displayNewJob );
+    app.post('/addjob', jobsCtrl.processNewJob );
     app.get('/jobs', jobsCtrl.ListAll );
     
     app.get('/resources', resourcesCtrl.getResources );
