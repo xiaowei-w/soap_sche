@@ -55,13 +55,24 @@ function getJSONFromURL( url, onSuccessCallback, onErrorCallback ) {
 
 function getResources(dp) {
     getJSONFromURL( '/resources', function(result) {
-        dp.resources = result.resources;
+        dp.resources = result;
         dp.update();
     })
 }
 
 function updateRes() {
     getResources(dp);
+}
+
+function initAddRow() {
+    var modal = new DayPilot.Modal();
+    modal.onClosed = function(args) {
+        var data = args.result;
+        if (data && data.result === "OK") { 
+             updateRes();
+        }
+    };
+    modal.showUrl("newresource");
 }
 
 function init() {
@@ -131,7 +142,7 @@ function init() {
         var modal = new DayPilot.Modal();
         modal.onClosed = function(args) {
             dp.clearSelection();
-            // var data = args.result;
+            var data = args.result;
             // if (data && data.result === "OK") { 
             //     loadEvents(); 
             //     dp.message(data.message); 

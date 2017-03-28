@@ -7,8 +7,8 @@ html
     script(src='/javascripts/daypilot/daypilot-all.min.js')
     script(src='/javascripts/bootstrap/bootstrap.min.js')
     script(src='/javascripts/bootstrap-select/bootstrap-select.min.js')
-    script(type='text/javascript').
-      function modclose(result) { DayPilot.Modal.close(result); }
+    script(src='/javascripts/new_job_helper.js')
+      
   body
     div.modal-header 
       button(class='close', onClick="modclose('Close')")
@@ -16,7 +16,7 @@ html
       h4.modal-title Weekly Job
       
     div(class='modal-body')
-      form(method='POST' action='/addjob')
+      form#f
         div.row
           div.col-xs-3
             label(for='name') Name
@@ -160,4 +160,4 @@ html
           div.col-xs-9.pull-right
             input#end_cmd.form-control(type='text', placeholder='Enter your command' name='end_cmd')
 
-        button.btn.btn-primary(type='submit') Submit
+        input.btn.btn-primary(type='submit',value='Submit')

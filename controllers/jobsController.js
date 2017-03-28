@@ -3,6 +3,8 @@
 var tasks = require('../models/cronjobs')();
 var resources = require('../models/resources')()
 var moment= require('moment-timezone');
+const util = require('util');
+
 
 exports.ListAll = function( req, res, next ) {
     // console.log(tasks.getCronTab());
@@ -39,5 +41,27 @@ exports.displayNewJob = function( req, res, next ) {
 };
 
 exports.processNewJob = function( req, res, next ) {
-    console.log(req);
+    //console.log(req);
+    // TODO: Validation of params
+
+    var name = req.body.name;
+    var resource = req.body.resource;
+    var start_param = {};
+    var end_param = {};
+    
+    var start_hr = req.body.start_hr;
+    var start_min = req.body.start_min;
+    var start_dow = req.body.start_dow;
+    var start_cmd = req.body.start_cmd;
+    
+    var end_hr = req.body.end_hr;
+    var end_min = req.body.end_min;
+    var end_dow = req.body.end_dow;
+    var end_cmd = req.body.en_cmd;
+    
+    var crontab = tasks.getCronTab();
+    var job = crontab.create(start_cmd, util.format('%d %d * * %s', start_min, start_hr, start_dow) );
+
+    crontab.save(function(err, crontab) {});
+    res.status(200).send({result:"OK"});
 };

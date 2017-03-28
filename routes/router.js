@@ -9,12 +9,16 @@ module.exports = function(app){
         res.render('index', { title: 'Soap Weekly Scheduler' });
     });
     
-    app.get('/newjob', jobsCtrl.displayNewJob );
-    app.post('/addjob', jobsCtrl.processNewJob );
-    app.get('/jobs', jobsCtrl.ListAll );
+    // Jobs
+    app.get('/jobs', jobsCtrl.ListAll );                        // Get all Jobs
+    app.get('/newjob', jobsCtrl.displayNewJob );                // Render New Job view
+    app.post('/addjob', jobsCtrl.processNewJob );               // Add a new Job
     
-    app.get('/resources', resourcesCtrl.getResources );
-
+    // Resource
+    app.get('/resources', resourcesCtrl.getResources );          // Get all Resources
+    app.get('/newresource', resourcesCtrl.displayNewResource );  // Render new Resource view
+    app.post('/addresource', resourcesCtrl.processNewResource ); // Add a new Resource
+    
     // Fall through
     app.use(function(req, res, next) {
         var err = new Error('Not Found');
