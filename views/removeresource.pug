@@ -16,7 +16,7 @@ html
           ev.preventDefault();
           // submit using AJAX
           var f = $("#f");
-          $.post("/resource/add", f.serialize(), function (result) {
+          $.post("/resource/del", f.serialize(), function (result) {
             modclose(result);
           });
         });
@@ -26,14 +26,16 @@ html
     div.modal-header 
       button(class='close', onClick="modclose('Close')")
         span(aria-hidden="true") x
-      h4.modal-title Add a row
+      h4.modal-title Remove a row
       
     div(class='modal-body')
       form#f
         div.row
           div.col-xs-3
-            label(for='name') Name
+            label Resource
           div.col-xs-9.pull-right
-            input#name.form-control(type='text', placeholder='Row name' name='name')
+            select(name='resource', class='selectpicker', data-width='fit')
+              each resource in resources
+                option(value=resource.id)=resource.name
         br
         input.btn.btn-primary(type='submit',value='Submit')

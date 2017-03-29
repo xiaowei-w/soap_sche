@@ -10,15 +10,19 @@ module.exports = function(app){
     });
     
     // Jobs
-    app.get('/jobs', jobsCtrl.ListAll );                        // Get all Jobs
-    app.get('/newjob', jobsCtrl.displayNewJob );                // Render New Job view
-    app.post('/addjob', jobsCtrl.processNewJob );               // Add a new Job
+    app.get('/job/list', jobsCtrl.ListAll );                        // Get all Jobs
+    app.get('/job/new', jobsCtrl.displayNewJob );                // Render New Job view
+    app.post('/job/add', jobsCtrl.processNewJob );               // Add a new Job
     
     // Resource
-    app.get('/resources', resourcesCtrl.getResources );          // Get all Resources
-    app.get('/newresource', resourcesCtrl.displayNewResource );  // Render new Resource view
-    app.post('/addresource', resourcesCtrl.processNewResource ); // Add a new Resource
+    app.get('/resource/list', resourcesCtrl.getResources );          // Get all Resources
+    app.get('/resource/new', resourcesCtrl.displayNewResource );  // Render new Resource view
+    app.get('/resource/remove', resourcesCtrl.displayRemoveResource );  // Render new Resource view
     
+    app.post('/resource/add', resourcesCtrl.processNewResource ); // Add a new Resource row
+    app.post('/resource/del', resourcesCtrl.processDelResource ); // Delete a new Resource row
+    
+
     // Fall through
     app.use(function(req, res, next) {
         var err = new Error('Not Found');

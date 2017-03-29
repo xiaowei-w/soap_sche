@@ -12,7 +12,7 @@ function setStartDate(dp) {
     // To centerize Today, we start 3 days before today.
     var start = new Date();
     start.setDate( new Date().getDate()-3);
-    dp.startDate = start; 
+    dp.startDate = start;
 }
 
 function setContextMenu(dp) {
@@ -54,7 +54,7 @@ function getJSONFromURL( url, onSuccessCallback, onErrorCallback ) {
 }
 
 function getResources(dp) {
-    getJSONFromURL( '/resources', function(result) {
+    getJSONFromURL( '/resource/list', function(result) {
         dp.resources = result;
         dp.update();
     })
@@ -62,6 +62,35 @@ function getResources(dp) {
 
 function updateRes() {
     getResources(dp);
+}
+
+function generateEvents( jobs ) {
+    var start = dp.startDate;
+    for ( var i=0; i< jobs.length; ++i) {
+        var job = jobs[i];
+        //console.log(job);
+        var e = new DayPilot.Event({
+            start: new DayPilot.Date(start).addHours(start),
+            end: new DayPilot.Date(start).addHours(start).addHours(duration),
+            id: DayPilot.guid(),
+            resource: "B",
+            text: "Event"/*,
+            bubbleHtml: "Testing bubble"*/
+        });
+        dp.events.add(e);
+    }
+    
+}
+
+function loadEvents() {
+    getJSONFromURL( '/job/list', function(result) {
+        //console.log(result);
+        if (result && result.jobs) {
+            generateEvents(result.jobs);
+        }
+        //dp.resources = result;
+        //dp.update();
+    })
 }
 
 function initAddRow() {
@@ -72,7 +101,18 @@ function initAddRow() {
              updateRes();
         }
     };
-    modal.showUrl("newresource");
+    modal.showUrl("resource/new");
+}
+
+function initDelRow() {
+    var modal = new DayPilot.Modal();
+    modal.onClosed = function(args) {
+        var data = args.result;
+        if (data && data.result === "OK") { 
+             updateRes();
+        }
+    };
+    modal.showUrl("resource/remove");
 }
 
 function init() {
@@ -143,12 +183,12 @@ function init() {
         modal.onClosed = function(args) {
             dp.clearSelection();
             var data = args.result;
-            // if (data && data.result === "OK") { 
+            if (data && data.result === "OK") { 
             //     loadEvents(); 
             //     dp.message(data.message); 
-            // }
+            }
         };
-        modal.showUrl("newjob?start=" + args.start + "&end=" + args.end + "&resource=" + args.resource);
+        modal.showUrl("job/new?start=" + args.start + "&end=" + args.end + "&resource=" + args.resource);
     };
 
     // dp.onEventClicked = function(args) {
@@ -180,4 +220,6 @@ function init() {
 
     // Scroll to Today
     dp.scrollTo(new DayPilot.Date());
+
+    loadEvents();
 }

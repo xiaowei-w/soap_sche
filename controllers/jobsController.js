@@ -1,20 +1,19 @@
 'use strict';
 
 var tasks = require('../models/cronjobs')();
-var resources = require('../models/resources')()
+var resources = require('../models/db')()
 var moment= require('moment-timezone');
 const util = require('util');
 
 
 exports.ListAll = function( req, res, next ) {
-    // console.log(tasks.getCronTab());
-    var jobs = tasks.getCronTab().jobs();
-    var jobs_str_array = [];
-    for ( var idx = 0; idx < jobs.length; idx++ ) {
-        jobs_str_array[idx] = jobs[idx].render();
-    }
-
-    res.json(jobs_str_array);
+    resources.getAllJobs(
+        function(err) {
+            res.status(404).send();
+        },
+        function(rows) {
+            res.json( { jobs: rows });
+        });
 };
 
 exports.displayNewJob = function( req, res, next ) {
@@ -31,37 +30,67 @@ exports.displayNewJob = function( req, res, next ) {
     details['start_hr'] = start.hour();
     details['start_min'] = start.minutes();
     
-    details['end_dow'] = end.day();
-    details['end_hr'] = end.hours();
-    details['end_min'] = end.minutes();
+    var duration = moment.duration(end.diff(start));
+    details['duration_hr'] = duration.asMinutes() / 60;
+    details['duration_min'] = duration.asMinutes() % 60;
 
     details['target_res'] = req.query.resource;
-    var re = resources.getResourceData();
-    res.render('newjob', { resources: re.resources, param : details });
+    console.log(details);
+    resources.getResourceData(
+        function(err) {
+            res.status(404).send();
+        },
+        function(rows) {
+            res.render('newjob', { resources: rows, param : details });
+        }
+    );
+    
 };
 
 exports.processNewJob = function( req, res, next ) {
-    //console.log(req);
+    // console.log(req);
     // TODO: Validation of params
 
-    var name = req.body.name;
-    var resource = req.body.resource;
-    var start_param = {};
-    var end_param = {};
-    
-    var start_hr = req.body.start_hr;
-    var start_min = req.body.start_min;
-    var start_dow = req.body.start_dow;
-    var start_cmd = req.body.start_cmd;
-    
-    var end_hr = req.body.end_hr;
-    var end_min = req.body.end_min;
-    var end_dow = req.body.end_dow;
-    var end_cmd = req.body.en_cmd;
-    
-    var crontab = tasks.getCronTab();
-    var job = crontab.create(start_cmd, util.format('%d %d * * %s', start_min, start_hr, start_dow) );
+    var job_details = {};
 
-    crontab.save(function(err, crontab) {});
-    res.status(200).send({result:"OK"});
+    job_details['$name']         = req.body.name;
+    job_details['$resource_id']  = req.body.resource;
+    job_details['$start_hr']     = req.body.start_hr;
+    job_details['$start_min']    = req.body.start_min;
+    job_details['$start_dow']    = JSON.stringify(req.body.start_dow);
+    job_details['$start_cmd']    = req.body.start_cmd;
+    job_details['$duration_hr']  = req.body.duration_hr;
+    job_details['$duration_min'] = req.body.duration_min;
+    job_details['$end_cmd']      = req.body.end_cmd;
+    
+    // Validate resource_id
+    resources.getResourceByID( job_details['$resource_id'], 
+        function(err) {
+            res.status(404).send();
+        },
+        function(row) {
+            if ( row == undefined ) {
+                // No such resource. return 403
+                res.status(404).send({ result: "No such resource" });
+                return
+            }
+
+            // Saving to DB
+            resources.addJob( job_details,
+                function(err) {
+                    res.status(404).send();
+                },
+                function(row) {
+                    // Saving to system crontab
+                    // var crontab = tasks.getCronTab();
+                    // var job = crontab.create(start_cmd, util.format('%d %d * * %s', start_min, start_hr, start_dow) );
+
+                    // crontab.save(function(err, crontab) {});
+
+                    res.status(200).send({result:"OK"});
+                }
+            );
+
+        }
+    )
 };

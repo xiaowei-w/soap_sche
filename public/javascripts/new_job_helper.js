@@ -8,7 +8,7 @@ $(document).ready( function() {
             
         // submit using AJAX
         var f = $("#f");
-        $.post("addjob", f.serialize(), function (result) {
+        $.post("/job/add", f.serialize(), function (result) {
             modclose(eval(result));
         });
             
