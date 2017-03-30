@@ -4,15 +4,16 @@ block content
   div.modal-header 
     button(class='close', onClick="modclose('Close')")
       span(aria-hidden="true") x
-    h4.modal-title Weekly Job
+    h4.modal-title Edit Job
     
   div(class='modal-body')
     form#f
+      input(type="hidden" name="id" value=param.id)
       div.row
         div.col-xs-3
           label(for='name') Name
         div.col-xs-9.pull-right
-          input#name.form-control(type='text', placeholder='Give your job a name' name='name')
+          input#name.form-control(type='text', placeholder='Give your job a name' name='name' value=param.name)
       br
       div.row
         div.col-xs-3
@@ -20,7 +21,7 @@ block content
         div.col-xs-9.pull-right
           select(name='resource', class='selectpicker', data-width='fit')
             each resource in resources
-              if resource.id == param.target_res
+              if resource.id == param.resource_id
                 option(value=resource.id, selected)=resource.name
               else
                 option(value=resource.id)=resource.name
@@ -113,12 +114,12 @@ block content
         div.col-xs-3
           label(for='name') On start, run
         div.col-xs-9.pull-right
-          input#start_cmd.form-control(type='text', placeholder='Enter your command' name='start_cmd')
+          input#start_cmd.form-control(type='text', placeholder='Enter your command' name='start_cmd' value=param.start_cmd)
       br
       div.row
         div.col-xs-3
           label(for='name') On end, run
         div.col-xs-9.pull-right
-          input#end_cmd.form-control(type='text', placeholder='Enter your command' name='end_cmd')
-
+          input#end_cmd.form-control(type='text', placeholder='Enter your command' name='end_cmd' value=param.end_cmd)
+      
       input.btn.btn-primary(type='submit',value='Submit')

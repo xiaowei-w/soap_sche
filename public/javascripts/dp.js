@@ -1,11 +1,11 @@
 'use strict'
 var dp = null;
-
+var events = [];
 function setCellDim(dp){
-    dp.eventHeight = 25;
+    dp.eventHeight = 55;
     dp.headerHeight = 15;
     
-    dp.cellWidth = 100;
+    dp.cellWidth = 80;
 }
 
 function setStartDate(dp) {
@@ -63,21 +63,34 @@ function getResources(dp) {
 function updateRes() {
     getResources(dp);
 }
-
+function flushAllEvents() {
+    for( var idx = 0; idx < events.length; ++idx ) {
+        dp.events.remove(events[idx]);
+    }
+    events = [];
+}
 function generateEvents( jobs ) {
-    var start = dp.startDate;
+    flushAllEvents()
     for ( var i=0; i< jobs.length; ++i) {
         var job = jobs[i];
         //console.log(job);
-        var e = new DayPilot.Event({
-            start: new DayPilot.Date(start).addHours(start),
-            end: new DayPilot.Date(start).addHours(start).addHours(duration),
-            id: DayPilot.guid(),
-            resource: "B",
-            text: "Event"/*,
-            bubbleHtml: "Testing bubble"*/
-        });
-        dp.events.add(e);
+        for( var add_day = 0; add_day < 7; ++add_day ) {
+            var start_d = dp.startDate;
+            start_d = start_d.addDays(add_day);
+            if ( job['start_dow'].indexOf(start_d.dayOfWeek()) > -1 ) {
+                //console.log("Found" + start_d.dayOfWeek());
+                var e = new DayPilot.Event({
+                    start: new DayPilot.Date(start_d).addHours(job['start_hr']).addMinutes(job['start_min']),
+                    end: new DayPilot.Date(start_d).addHours(job['start_hr']).addMinutes(job['start_min']).addHours(job['duration_hr']).addMinutes(job['duration_min']),
+                    id: DayPilot.guid(),
+                    resource: job['resource_id'],
+                    text: job['name'],
+                    tag: job
+                });
+                dp.events.add(e);
+                events.push(e);
+            }
+        }
     }
     
 }
@@ -88,8 +101,6 @@ function loadEvents() {
         if (result && result.jobs) {
             generateEvents(result.jobs);
         }
-        //dp.resources = result;
-        //dp.update();
     })
 }
 
@@ -113,6 +124,43 @@ function initDelRow() {
         }
     };
     modal.showUrl("resource/remove");
+}
+function createBubbleHTML (args) {
+    //args.e.bubbleHtml = args.e.start + " to " + args.e.end;
+    var DAY_OF_WEEK = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    var job = args.e.tag;
+    args.e.bubbleHtml   = "<div style='font-weight:bold'>" + args.e.text;
+    args.e.bubbleHtml   += "<br> ";
+    for (var i=0; i< DAY_OF_WEEK.length; ++i) {
+       if (job['start_dow'].indexOf(i) > -1) {
+           args.e.bubbleHtml   += DAY_OF_WEEK[i] + " ";
+       }
+    }
+    args.e.bubbleHtml   += "<br> Runtime " + job['duration_hr'] + "hr " + job['duration_min'] + "min";
+    args.e.bubbleHtml   += "<br> StartCMD [" + args.e.tag['start_cmd'] + ']';
+    args.e.bubbleHtml   += "<br> EndCMD   [" + args.e.tag['end_cmd'] + ']';
+    args.e.bubbleHtml   += "</div>";
+}
+
+var slidingTimeout = null;
+
+function showCurrentTime() {
+    dp.update({
+        separators: [{color:"Red", location: new DayPilot.Date()}]
+    });
+    
+    slidingTimeout = setInterval(function() {
+        dp.update({
+            separators: [{color:"Red", location: new DayPilot.Date()}]
+        });
+    }, 60000);  // once per minute
+}
+
+function hideCurrentTime() {
+  dp.update({
+    separators: []
+  });
+  clearInterval(slidingTimeout);
 }
 
 function init() {
@@ -142,65 +190,57 @@ function init() {
     dp.rowHeaderWidth = 100;
     
     getResources(dp);
-    
-    // generate and load events
-    // for (var i = 0; i < 1; i++) {
-    //     var duration = Math.floor(Math.random() * 6) + 1; // 1 to 6
-    //     var start = Math.floor(Math.random() * 6) - 3; // -3 to 3
-
-    //     var e = new DayPilot.Event({
-    //         start: new DayPilot.Date("2013-03-25T00:00:00").addHours(start),
-    //         end: new DayPilot.Date("2013-03-25T12:00:00").addHours(start).addHours(duration),
-    //         id: DayPilot.guid(),
-    //         resource: "B",
-    //         text: "Event"/*,
-    //         bubbleHtml: "Testing bubble"*/
-    //     });
-    //     dp.events.add(e);
-    // }
 
     dp.eventHoverHandling = "Bubble";
 
-    dp.onBeforeEventRender = function(args) {
-        args.e.bubbleHtml = args.e.start + " " + args.e.end;
-    };
-
+    dp.onBeforeEventRender = createBubbleHTML;
+    // dp.onBeforeCellRender = function(args) {
+    //     if (args.cell.start.getDayOfWeek() === 6) {
+    //         args.cell.backColor = "#dddddd";
+    //     }
+    // };    
     // event creating
     dp.onTimeRangeSelected = function (args) {
-        // var name = prompt("New event name:", "Event");
-        // dp.clearSelection();
-        // if (!name) return;
-        // var e = new DayPilot.Event({
-        //     start: args.start,
-        //     end: args.end,
-        //     id: DayPilot.guid(),
-        //     resource: args.resource,
-        //     text: name
-        // });
-        // dp.events.add(e);
-        // dp.message("Created");
         var modal = new DayPilot.Modal();
         modal.onClosed = function(args) {
             dp.clearSelection();
             var data = args.result;
             if (data && data.result === "OK") { 
-            //     loadEvents(); 
-            //     dp.message(data.message); 
+                dp.message(data.message); 
             }
+            loadEvents(); 
         };
         modal.showUrl("job/new?start=" + args.start + "&end=" + args.end + "&resource=" + args.resource);
     };
 
-    // dp.onEventClicked = function(args) {
-    //     alert("clicked: " + args.e.id());
-    // };
-
-    // dp.onTimeHeaderClick = function(args) {
-    //     alert("clicked: " + args.header.start);
-    // };
+    dp.onEventClick = function(args) {
+        var modal = new DayPilot.Modal();
+        modal.onClosed = function(args) {
+            dp.clearSelection();
+            var data = args.result;
+            if (data && data.result === "OK") { 
+                dp.message(data.message); 
+            }
+            loadEvents(); 
+        };
+        modal.showUrl("job/edit?start=" + args.e.start() + "&end=" + args.e.end() + "&id=" + args.e.tag()['id']);
+    };
 
     dp.snapToGrid = false;
     dp.useEventBoxes = "Never";
+
+    dp.onEventMoved = function(args) {
+        var modal = new DayPilot.Modal();
+        modal.onClosed = function(args) {
+            dp.clearSelection();
+            var data = args.result;
+            if (data && data.result === "OK") { 
+                dp.message(data.message); 
+            }
+            loadEvents(); 
+        };
+        modal.showUrl("job/edit?start=" + args.newStart + "&end=" + args.newEnd + "&id=" + args.e.tag()['id']);
+    };
 
     dp.onEventMoving = function(args) {
         var offset = args.start.getMinutes() % 5;
@@ -213,13 +253,12 @@ function init() {
         args.left.html = args.start.toString("h:mm tt");
     };
 
-
     dp.onIncludeTimeCell = function(args) {};
     dp.rowClickHandling = true;
     dp.init();
 
     // Scroll to Today
-    dp.scrollTo(new DayPilot.Date());
-
+    dp.scrollTo(new DayPilot.Date().addHours(-4));
+    showCurrentTime();
     loadEvents();
 }

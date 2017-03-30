@@ -10,17 +10,22 @@ module.exports = function(app){
     });
     
     // Jobs
-    app.get('/job/list', jobsCtrl.ListAll );                        // Get all Jobs
-    app.get('/job/new', jobsCtrl.displayNewJob );                // Render New Job view
-    app.post('/job/add', jobsCtrl.processNewJob );               // Add a new Job
+    app.get('/job/list',        jobsCtrl.ListAll );                        // Get all Jobs
+
+    app.get('/job/new',         jobsCtrl.displayNewJob );                // Render New Job view
+    app.post('/job/add',        jobsCtrl.processAddJob );               // Add a new Job
+
+    app.get('/job/edit',        jobsCtrl.displayEditJob );                // Render Edit Job view
+    app.post('/job/update',     jobsCtrl.processUpdateJob );               // Add a new Job
     
     // Resource
-    app.get('/resource/list', resourcesCtrl.getResources );          // Get all Resources
-    app.get('/resource/new', resourcesCtrl.displayNewResource );  // Render new Resource view
-    app.get('/resource/remove', resourcesCtrl.displayRemoveResource );  // Render new Resource view
+    app.get('/resource/list',   resourcesCtrl.getResources );          // Get all Resources
+
+    app.get('/resource/new',    resourcesCtrl.displayNewResource );  // Render new Resource view
+    app.post('/resource/add',   resourcesCtrl.processAddResource ); // Add a new Resource row
     
-    app.post('/resource/add', resourcesCtrl.processNewResource ); // Add a new Resource row
-    app.post('/resource/del', resourcesCtrl.processDelResource ); // Delete a new Resource row
+    app.get('/resource/remove', resourcesCtrl.displayRemoveResource );  // Render new Resource view
+    app.post('/resource/del',   resourcesCtrl.processDelResource ); // Delete a new Resource row
     
 
     // Fall through

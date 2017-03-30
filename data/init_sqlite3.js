@@ -11,9 +11,6 @@ db.serialize(function() {
     db.run(create_resource_table);
     db.run("CREATE INDEX resources_delete_idx ON resources (toDelete )");
 
-    //db.run("INSERT INTO resources VALUES ( ?, ?, 0 )", ['1', 'c166']);
-    //db.run("INSERT INTO resources VALUES ( ?, ?, 0 )", ['2', 'c201']);
-    
     var create_job_table    = "CREATE TABLE if not exists jobs ( "
     create_job_table        += "job_id INTEGER PRIMARY KEY AUTOINCREMENT, "
     create_job_table        += "name CHAR(255) NOT NULL, "
@@ -31,10 +28,8 @@ db.serialize(function() {
     
     db.run(create_job_table);
     db.run("CREATE INDEX jobs_delete_idx ON jobs (toDelete)");
+    db.run("CREATE INDEX jobs_resource_id_idx ON jobs (resource_id)");
 
-    // db.each("SELECT resource_id AS id, name, toDelete FROM resources", function(err, row) {
-    //    console.log(row.id + ": " + row.name + " Delete:" + row.toDelete);
-    // });
 });
 
 db.close();

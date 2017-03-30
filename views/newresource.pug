@@ -1,39 +1,17 @@
-doctype html
-html
-  head
-    link(rel='stylesheet', href='/stylesheets/bootstrap/bootstrap.min.css')
-    link(rel='stylesheet', href='/stylesheets/bootstrap-select/bootstrap-select.min.css')
-    script(src='/javascripts/jquery-1.12.2.min.js')
-    script(src='/javascripts/daypilot/daypilot-all.min.js')
-    script(src='/javascripts/bootstrap/bootstrap.min.js')
-    script(src='/javascripts/bootstrap-select/bootstrap-select.min.js')
-    script(type='text/javascript').
-      function modclose(result) { 
-        DayPilot.Modal.close(result); 
-      }
-      $(document).ready( function() {
-        $("#f").submit(function (ev) {
-          ev.preventDefault();
-          // submit using AJAX
-          var f = $("#f");
-          $.post("/resource/add", f.serialize(), function (result) {
-            modclose(result);
-          });
-        });
-      });
+extends layout_modal
 
-  body
-    div.modal-header 
-      button(class='close', onClick="modclose('Close')")
-        span(aria-hidden="true") x
-      h4.modal-title Add a row
-      
-    div(class='modal-body')
-      form#f
-        div.row
-          div.col-xs-3
-            label(for='name') Name
-          div.col-xs-9.pull-right
-            input#name.form-control(type='text', placeholder='Row name' name='name')
-        br
-        input.btn.btn-primary(type='submit',value='Submit')
+block content
+  div.modal-header 
+    button(class='close', onClick="modclose('Close')")
+      span(aria-hidden="true") x
+    h4.modal-title Add Resource
+    
+  div(class='modal-body')
+    form#f
+      div.row
+        div.col-xs-3
+          label(for='name') Name
+        div.col-xs-9.pull-right
+          input#name.form-control(type='text', placeholder='Row name' name='name')
+      br
+      input.btn.btn-primary(type='submit',value='Submit')

@@ -4,7 +4,7 @@ var resources = require('../models/db')()
 exports.getResources = function( req, res, next ) {
     resources.getResourceData( 
         function(err) {
-            res.status(404).send();
+            res.status(404).send({ result: "ERROR", message:"Not Found" });
         },
         function(rows) {
             res.json(rows);
@@ -14,31 +14,31 @@ exports.getResources = function( req, res, next ) {
 };
 
 exports.displayNewResource = function( req, res, next ) {
-    res.render('newresource');
+    res.render('newresource', { send_path: '/resource/add' });
 };
 
-exports.displayRemoveResource = function( req, res, next ) {
-    resources.getResourceData( 
-        function(err) {
-            res.status(404).send();
-        },
-        function(rows) {
-            res.render('removeresource', { resources: rows } );
-        }
-    );
-};
-
-exports.processNewResource = function( req, res, next ) {
+exports.processAddResource = function( req, res, next ) {
     //console.log(req);
     // TODO: Validation of params
     var name = req.body.name;
 
     resources.addResource( name, 
         function(err) {
-            res.status(404).send();
+            res.status(404).send({ result: "ERROR", message:"Not Found" });
         },
         function(data) {
-            res.status(200).send({result:"OK"});
+            res.status(200).send({result:"OK", message:"Resource added"});
+        }
+    );
+};
+
+exports.displayRemoveResource = function( req, res, next ) {
+    resources.getResourceData( 
+        function(err) {
+            res.status(404).send({ result: "ERROR", message:"Not Found" });
+        },
+        function(rows) {
+            res.render('removeresource', { resources: rows, send_path: '/resource/del' } );
         }
     );
 };
@@ -50,10 +50,10 @@ exports.processDelResource = function( req, res, next ) {
     
     resources.delResource( resource_id, 
         function(err) {
-            res.status(404).send();
+            res.status(404).send({ result: "ERROR", message:"Not Found" });
         },
         function(data) {
-            res.status(200).send({result:"OK"});
+            res.status(200).send({result:"OK", message:"Resource successfully deleted"});
         }
     );
 };
