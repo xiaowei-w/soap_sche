@@ -53,6 +53,27 @@ function getJSONFromURL( url, onSuccessCallback, onErrorCallback ) {
     })
 }
 
+function getPOSTFromURL( url, data, onSuccessCallback, onErrorCallback ) {
+    $.ajax({
+        type: "post",
+        beforeSend : function (request) {
+            request.setRequestHeader("Accept", "application/json");
+        },
+        url: url,
+        dataType: "json",
+        data : data,
+        success: function (result) {
+            if ( !( onSuccessCallback === undefined) ) {
+                onSuccessCallback(result);
+            }
+        },
+        error: function (error) {
+            if ( !(onErrorCallback === undefined) ) {
+                onErrorCallback(error);
+            }
+        }
+    })
+}
 function getResources(dp) {
     getJSONFromURL( '/resource/list', function(result) {
         dp.resources = result;
@@ -85,7 +106,8 @@ function generateEvents( jobs ) {
                     id: DayPilot.guid(),
                     resource: job['resource_id'],
                     text: job['name'],
-                    tag: job
+                    tag: job,
+                    height: 80
                 });
                 dp.events.add(e);
                 events.push(e);
@@ -163,6 +185,59 @@ function hideCurrentTime() {
   clearInterval(slidingTimeout);
 }
 
+function onModalClosedHandler(args) {
+    dp.clearSelection();
+    var data = args.result;
+    if (data && data.result === "OK") { 
+        dp.message(data.message); 
+    }
+    loadEvents(); 
+};
+
+function initEventHandling() {
+    // Pop Up Bubble
+    dp.eventHoverHandling = "Bubble";
+    dp.onBeforeEventRender = createBubbleHTML;
+
+    // event creating
+    dp.onTimeRangeSelected = function (args) {
+        var modal = new DayPilot.Modal();
+        modal.onClosed = onModalClosedHandler;
+        modal.showUrl("job/new?start=" + args.start + "&end=" + args.end + "&resource=" + args.resource);
+    };
+
+    dp.onEventClick = function(args) {
+        var modal = new DayPilot.Modal();
+        modal.onClosed = onModalClosedHandler;
+        modal.showUrl("job/edit?start=" + args.e.start() + "&end=" + args.e.end() + "&id=" + args.e.tag()['id']);
+    };
+    dp.onEventMoved = function(args) {
+        var modal = new DayPilot.Modal();
+        modal.onClosed = onModalClosedHandler;
+        modal.showUrl("job/edit?start=" + args.newStart + "&end=" + args.newEnd + "&id=" + args.e.tag()['id']);
+    };
+
+    dp.onEventMoving = function(args) {
+        var offset = args.start.getMinutes() % 5;
+        if (offset) {
+            args.start = args.start.addMinutes(-offset);
+            args.end = args.end.addMinutes(-offset);
+        }
+
+        args.left.enabled = true;
+        args.left.html = args.start.toString("h:mm tt");
+    };
+
+    dp.eventDeleteHandling="Enabled";
+    dp.onEventDeleted = function(args) {
+        var modal = new DayPilot.Modal();
+        modal.onClosed = onModalClosedHandler;
+        modal.showUrl("job/remove?" + "id=" + args.e.tag()['id']);
+    };
+
+    dp.eventHoverHandling = "Update";
+    dp.eventResizeHandling = "Disabled";
+}
 function init() {
     dp = new DayPilot.Scheduler("dp");
 
@@ -175,7 +250,8 @@ function init() {
     dp.cellGroupBy = "Month";
     dp.days = 7;
     dp.cellDuration = 1440; // one day
-
+    dp.eventTextWrappingEnabled = true;
+    
     dp.timeHeaders = [
         { groupBy: "Day" , format: "d-MMM-yyyy (dddd)"},
         { groupBy: "Cell" }
@@ -191,67 +267,10 @@ function init() {
     
     getResources(dp);
 
-    dp.eventHoverHandling = "Bubble";
-
-    dp.onBeforeEventRender = createBubbleHTML;
-    // dp.onBeforeCellRender = function(args) {
-    //     if (args.cell.start.getDayOfWeek() === 6) {
-    //         args.cell.backColor = "#dddddd";
-    //     }
-    // };    
-    // event creating
-    dp.onTimeRangeSelected = function (args) {
-        var modal = new DayPilot.Modal();
-        modal.onClosed = function(args) {
-            dp.clearSelection();
-            var data = args.result;
-            if (data && data.result === "OK") { 
-                dp.message(data.message); 
-            }
-            loadEvents(); 
-        };
-        modal.showUrl("job/new?start=" + args.start + "&end=" + args.end + "&resource=" + args.resource);
-    };
-
-    dp.onEventClick = function(args) {
-        var modal = new DayPilot.Modal();
-        modal.onClosed = function(args) {
-            dp.clearSelection();
-            var data = args.result;
-            if (data && data.result === "OK") { 
-                dp.message(data.message); 
-            }
-            loadEvents(); 
-        };
-        modal.showUrl("job/edit?start=" + args.e.start() + "&end=" + args.e.end() + "&id=" + args.e.tag()['id']);
-    };
+    initEventHandling();
 
     dp.snapToGrid = false;
     dp.useEventBoxes = "Never";
-
-    dp.onEventMoved = function(args) {
-        var modal = new DayPilot.Modal();
-        modal.onClosed = function(args) {
-            dp.clearSelection();
-            var data = args.result;
-            if (data && data.result === "OK") { 
-                dp.message(data.message); 
-            }
-            loadEvents(); 
-        };
-        modal.showUrl("job/edit?start=" + args.newStart + "&end=" + args.newEnd + "&id=" + args.e.tag()['id']);
-    };
-
-    dp.onEventMoving = function(args) {
-        var offset = args.start.getMinutes() % 5;
-        if (offset) {
-            args.start = args.start.addMinutes(-offset);
-            args.end = args.end.addMinutes(-offset);
-        }
-
-        args.left.enabled = true;
-        args.left.html = args.start.toString("h:mm tt");
-    };
 
     dp.onIncludeTimeCell = function(args) {};
     dp.rowClickHandling = true;
@@ -259,6 +278,7 @@ function init() {
 
     // Scroll to Today
     dp.scrollTo(new DayPilot.Date().addHours(-4));
+    
     showCurrentTime();
     loadEvents();
 }

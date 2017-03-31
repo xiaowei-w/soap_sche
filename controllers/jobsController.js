@@ -36,7 +36,7 @@ exports.displayNewJob = function( req, res, next ) {
     details['duration_min'] = duration.asMinutes() % 60;
 
     details['target_res'] = req.query.resource;
-    console.log(details);
+    // console.log(details);
     resources.getResourceData( send404Error,
         function(rows) {
             res.render('newjob', { resources: rows, param : details, send_path: '/job/add' });
@@ -121,7 +121,7 @@ exports.displayEditJob = function( req, res, next ) {
             result['start_min']     = details['start_min'];
             result['duration_hr']   = details['duration_hr'];
             result['duration_min']  = details['duration_min'];
-            console.log(result);
+            //console.log(result);
             // Set the post path
             resources.getResourceData( send404Error,
                 function(rows) {
@@ -164,6 +164,56 @@ exports.processUpdateJob = function( req, res, next ) {
                 },
                 function(row) {
                     // Saving to system crontab
+                    // var crontab = tasks.getCronTab();
+                    // var job = crontab.create(start_cmd, util.format('%d %d * * %s', start_min, start_hr, start_dow) );
+
+                    // crontab.save(function(err, crontab) {});
+
+                    res.status(200).send({result:"OK", message:"Updated!"});
+                }
+            );
+        }
+    )
+};
+
+exports.displayRemoveJob = function( req, res, next ) {
+    
+    var job_id = req.query.id;
+    //console.log(details);
+    resources.getJobByID( job_id, send404Error,
+        function(result) {
+            if ( result == undefined ) {
+                // No such resource. return 403
+                res.status(403).send({ result: "ERROR", message:"No such resource" });
+                return
+            }
+            res.render('removejob', { param: result, send_path: '/job/del' });
+        }
+    );
+};
+
+exports.processDelJob = function( req, res, next ) {
+    // console.log(req);
+    // TODO: Validation of params
+
+    var job_id = req.body.id;                  
+    
+    // Validate resource_id
+    resources.getJobByID( job_id, send404Error,
+        function(row) {
+            if ( row == undefined ) {
+                // No such resource. return 403
+                res.status(403).send({ result: "ERROR", message:"No such resource" });
+                return
+            }
+
+            // Saving to DB
+            resources.delJob( job_id,
+                function(err) {
+                    res.status(404).send();
+                },
+                function(row) {
+                    // Del to system crontab
                     // var crontab = tasks.getCronTab();
                     // var job = crontab.create(start_cmd, util.format('%d %d * * %s', start_min, start_hr, start_dow) );
 

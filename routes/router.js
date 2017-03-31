@@ -6,26 +6,29 @@ var resourcesCtrl = require('../controllers/resourcesController')
 module.exports = function(app){
     // Main Routes
     app.get('/', function( req, res, next ) {
-        res.render('index', { title: 'Soap Weekly Scheduler' });
+        res.render('index', { title: 'Soap Weekly Cron Scheduler' });
     });
     
     // Jobs
-    app.get('/job/list',        jobsCtrl.ListAll );                        // Get all Jobs
+    app.get('/job/list',        jobsCtrl.ListAll );                     // Get all Jobs
 
-    app.get('/job/new',         jobsCtrl.displayNewJob );                // Render New Job view
+    app.get('/job/new',         jobsCtrl.displayNewJob );               // Render New Job view
     app.post('/job/add',        jobsCtrl.processAddJob );               // Add a new Job
 
-    app.get('/job/edit',        jobsCtrl.displayEditJob );                // Render Edit Job view
-    app.post('/job/update',     jobsCtrl.processUpdateJob );               // Add a new Job
+    app.get('/job/edit',        jobsCtrl.displayEditJob );              // Render Edit Job view
+    app.post('/job/update',     jobsCtrl.processUpdateJob );            // Add a new Job
+    
+    app.get('/job/remove',      jobsCtrl.displayRemoveJob );            // Render new Resource view
+    app.post('/job/del',        jobsCtrl.processDelJob );               // Delete a new Resource row
     
     // Resource
-    app.get('/resource/list',   resourcesCtrl.getResources );          // Get all Resources
+    app.get('/resource/list',   resourcesCtrl.getResources );           // Get all Resources
 
-    app.get('/resource/new',    resourcesCtrl.displayNewResource );  // Render new Resource view
-    app.post('/resource/add',   resourcesCtrl.processAddResource ); // Add a new Resource row
+    app.get('/resource/new',    resourcesCtrl.displayNewResource );     // Render new Resource view
+    app.post('/resource/add',   resourcesCtrl.processAddResource );     // Add a new Resource row
     
     app.get('/resource/remove', resourcesCtrl.displayRemoveResource );  // Render new Resource view
-    app.post('/resource/del',   resourcesCtrl.processDelResource ); // Delete a new Resource row
+    app.post('/resource/del',   resourcesCtrl.processDelResource );     // Delete a new Resource row
     
 
     // Fall through

@@ -16,4 +16,8 @@ block content
             each resource in resources
               option(value=resource.id)=resource.name
       br
-      input.btn.btn-primary(type='submit',value='Submit')
+      div.row
+        div.col-xs-12
+          label All jobs linked to this resource will be deleted! Confirm delete?
+      br
+      input.btn.btn-primary(type='submit',value='Yes')

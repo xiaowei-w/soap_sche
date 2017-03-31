@@ -1,0 +1,16 @@
+extends layout_modal
+
+block content
+  div.modal-header 
+    button(class='close', onClick="modclose('Close')")
+      span(aria-hidden="true") x
+    h4.modal-title Delete Job
+    
+  div(class='modal-body')
+    form#f
+      input(type="hidden" name="id" value=param.id)
+      div.row
+        div.col-xs-12
+          label Do you want to delete this job (#{param.name})?
+      br
+      input.btn.btn-primary(type='submit',value='Yes')

@@ -7,7 +7,7 @@ var db = new sqlite3.Database(path.join(__dirname, '..', 'data', 'mydb.db'));
 module.exports = function () {
     return {
         getResourceData( onErrorCallback, onSuccessCallback ) {
-            db.all("SELECT resource_id AS id, name FROM resources WHERE toDelete = 0", function(err, row) {
+            db.all("SELECT resource_id AS id, name FROM resources", function(err, row) {
                 if (err) {
                     if ( onErrorCallback !== 'undefined' ) {
                         onErrorCallback(err);
@@ -18,7 +18,7 @@ module.exports = function () {
             });
         },
         getResourceByID( resource_id, onErrorCallback, onSuccessCallback ) {
-            db.get("SELECT resource_id AS id FROM resources WHERE toDelete = 0 AND resource_id = ?", resource_id,
+            db.get("SELECT resource_id AS id FROM resources WHERE resource_id = ?", resource_id,
                 function(err, row) {
                     if (err) {
                         if ( onErrorCallback !== 'undefined' ) {
@@ -50,24 +50,31 @@ module.exports = function () {
         delResource( resource_id, onErrorCallback, onSuccessCallback ) {
             db.serialize( function() {
                 db.run("BEGIN TRANSACTION");
-                db.run("UPDATE resources SET toDelete = 1 WHERE resource_id = ?", resource_id, function (e){
+                db.run("DELETE FROM resources WHERE resource_id = ?", resource_id, function (e){
                     if (e) {
                         console.log(e);
-                        onErrorCallback(e);
+                        db.run("ROLLBACK", onErrorCallback(e));
                         return
                     }
-                    onSuccessCallback(this.lastID)
+                    
+                    db.run("DELETE FROM jobs WHERE resource_id = ?", resource_id, function (e){
+                        if (e) {
+                            console.log(e);
+                            db.run("ROLLBACK", onErrorCallback(e));
+                            return
+                        }
+                        onSuccessCallback(this.lastID);
+                    });
 
                 });
                 db.run("END");
             });
         },
-
         getAllJobs( onErrorCallback, onSuccessCallback ) {
             var select_stmt = "SELECT job_id AS id, name, resource_id, ";
             select_stmt     += "start_hr, start_min, start_dow, start_cmd, ";
             select_stmt     += "duration_hr, duration_min, end_cmd ";
-            select_stmt     += "FROM jobs WHERE toDelete = 0";
+            select_stmt     += "FROM jobs";
 
             db.all(select_stmt, function(err, row) {
                 if (err) {
@@ -83,7 +90,7 @@ module.exports = function () {
             var select_stmt = "SELECT job_id AS id, name, resource_id, ";
             select_stmt     += "start_hr, start_min, start_dow, start_cmd, ";
             select_stmt     += "duration_hr, duration_min, end_cmd ";
-            select_stmt     += "FROM jobs WHERE toDelete = 0 AND id=?";
+            select_stmt     += "FROM jobs WHERE id=?";
             
             db.get(select_stmt, job_id, function(err, row) {
                 if (err) {
@@ -128,6 +135,21 @@ module.exports = function () {
             db.serialize( function() {
                 db.run("BEGIN TRANSACTION");
                 db.run(update_stmt, job_detail, function (e){
+                    if (e) {
+                        console.log(e);
+                        onErrorCallback(e);
+                        return
+                    }
+                    onSuccessCallback(this.lastID)
+
+                });
+                db.run("END");
+            });
+        },
+        delJob( job_id, onErrorCallback, onSuccessCallback ) {
+            db.serialize( function() {
+                db.run("BEGIN TRANSACTION");
+                db.run("DELETE FROM jobs WHERE job_id = ?", job_id, function (e){
                     if (e) {
                         console.log(e);
                         onErrorCallback(e);
