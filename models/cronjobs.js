@@ -14,7 +14,10 @@ crontab.loadAsync().then( function(crontab) {
 module.exports = function() {
   return {
     getCronTab() {
-      return cron;
+      crontab.loadAsync().then( function(crontab) {
+        //console.log(crontab);
+        cron = crontab;
+      });
     }
   }
 };

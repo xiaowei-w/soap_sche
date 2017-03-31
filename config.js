@@ -16,5 +16,6 @@ config.production = {
 };
  
 config.environment = process.env.ENVIRON || 'development';
- 
+config.enable_cron_write = process.env.CRON_WRITE || false;
+
 module.exports = config;

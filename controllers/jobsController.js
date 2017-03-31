@@ -4,6 +4,7 @@ var tasks = require('../models/cronjobs')();
 var resources = require('../models/db')()
 var moment= require('moment-timezone');
 const util = require('util');
+var config = require('../config');
 
 function send404Error( err ) { res.status(404).send({ result: "ERROR", message:"Not Found" }); };
 
@@ -55,7 +56,7 @@ exports.processAddJob = function( req, res, next ) {
     job_details['$resource_id']  = req.body.resource;
     job_details['$start_hr']     = req.body.start_hr;
     job_details['$start_min']    = req.body.start_min;
-    job_details['$start_dow']    = req.body.start_dow;
+    job_details['$start_dow']    = JSON.stringify(req.body.start_dow);
     job_details['$start_cmd']    = req.body.start_cmd;
     job_details['$duration_hr']  = req.body.duration_hr;
     job_details['$duration_min'] = req.body.duration_min;
@@ -76,11 +77,20 @@ exports.processAddJob = function( req, res, next ) {
                     res.status(404).send();
                 },
                 function(row) {
-                    // Saving to system crontab
-                    // var crontab = tasks.getCronTab();
-                    // var job = crontab.create(start_cmd, util.format('%d %d * * %s', start_min, start_hr, start_dow) );
+                    if (config.enable_cron_write == true) {
+                        var crontab = tasks.getCronTab();
+                        var job = crontab.create(job_details['$start_cmd'], 
+                            util.format('%d %d * * %s', job_details['$start_min'], job_details['$start_hr'], req.body.start_dow), 
+                            util.format('{ job_id : %d, job_name : %s }', row, job_details['$name'] ) );
+                        
+                        if ( job_details['$end_cmd'].length > 0 ) {
+                            var job2 = crontab.create(job_details['$end_cmd'], 
+                                util.format('%d %d * * %s', job_details['$start_min'], job_details['$start_hr'], req.body.start_dow), 
+                                util.format('{ job_id : %d, job_name : %s }', row, job_details['$name'] ) );
+                        }
+                    }
 
-                    // crontab.save(function(err, crontab) {});
+                    crontab.save(function(err, crontab) {});
 
                     res.status(200).send({result:"OK", message:"Job Saved"});
                 }
@@ -164,10 +174,14 @@ exports.processUpdateJob = function( req, res, next ) {
                 },
                 function(row) {
                     // Saving to system crontab
-                    // var crontab = tasks.getCronTab();
-                    // var job = crontab.create(start_cmd, util.format('%d %d * * %s', start_min, start_hr, start_dow) );
+                    // if (config.enable_cron_write == true) {
+                    //     var crontab = tasks.getCronTab();
+                    //     var job = crontab.create(job_details['$start_cmd'], 
+                    //         util.format('%d %d * * %s', job_details['$start_min'], job_details['$start_hr'], req.body.start_dow), 
+                    //         util.format('{ job_id : %d, job_name : %s }', job_details['$job_id'], job_details['$name'] ) );
 
-                    // crontab.save(function(err, crontab) {});
+                    //     crontab.save(function(err, crontab) {});
+                    // }
 
                     res.status(200).send({result:"OK", message:"Updated!"});
                 }
