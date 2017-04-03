@@ -1,5 +1,8 @@
 'use strict';
 var resources = require('../models/db')()
+var tasks = require('../models/cronjobs')();
+var config = require('../config');
+const util = require('util');
 
 exports.getResources = function( req, res, next ) {
     resources.getResourceData( 
@@ -53,6 +56,15 @@ exports.processDelResource = function( req, res, next ) {
             res.status(404).send({ result: "ERROR", message:"Not Found" });
         },
         function(data) {
+            if (config.enable_cron_write == 'true') {
+                // Del to system crontab
+                var crontab = tasks.getCronTab();   
+                // Look for the jobs
+                var jobs = crontab.jobs({ comment: util.format('res_id : %d', resource_id ) });
+
+                crontab.remove(jobs);
+                crontab.save(function(err, crontab) {});
+            }
             res.status(200).send({result:"OK", message:"Resource successfully deleted"});
         }
     );
