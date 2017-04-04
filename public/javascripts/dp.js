@@ -5,7 +5,7 @@ function setCellDim(dp){
     dp.eventHeight = 55;
     dp.headerHeight = 15;
     
-    dp.cellWidth = 80;
+    dp.cellWidth = 40;
 }
 
 function setStartDate(dp) {
