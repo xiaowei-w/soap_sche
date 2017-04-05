@@ -1,10 +1,12 @@
 Description
 =======
-Nodejs Web project that schedules system cron jobs. 
+Nodejs-based Cron job scheduler. 
 
 Uses DayPilot Scheduler [https://www.daypilot.org/] to display the cron jobs.
 
 Uses sqlite for persistence storage.
+
+Uses crontab [https://github.com/dachev/node-crontab] for writing to system cron.
 
 ####  Usage
 1. Initialize the sqlite DB. 
