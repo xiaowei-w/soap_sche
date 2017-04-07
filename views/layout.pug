@@ -7,11 +7,27 @@ html
     link(rel='stylesheet', href='/stylesheets/media/layout.css')
     link(rel='stylesheet', href='/stylesheets/media/elements.css')
     link(rel='stylesheet', href='/stylesheets/bootstrap/bootstrap.min.css')
+    link(rel='stylesheet', href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css")
+    link(rel='stylesheet', href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css")
+    link(rel='stylesheet', href="/stylesheets/adminlte/css/AdminLTE.min.css")
+    link(rel='stylesheet', href="/stylesheets/adminlte/css/skins/_all-skins.min.css")
 
     script(src='/javascripts/jquery-1.12.2.min.js')
     script(src='/javascripts/daypilot/daypilot-all.min.js')
     script(src='/javascripts/bootstrap/bootstrap.min.js')
     script(src='/javascripts/dp.js')
-    
-  body(onload="init()")
+    script(src='/javascripts/adminlte/app.min.js')
+
+  body(onload="init()" class="hold-transition skin-blue layout-top-nav")
+    block header
+      header.main-header
+        nav.navbar.navbar-static-top
+          div.container
+            div.navbar-header
+              b.navbar-brand= title
     block content
+
+    block footer
+      footer.main-footer
+        div.container
+          strong Soap © 2017.

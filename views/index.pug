@@ -1,16 +1,28 @@
 extends layout
 
 block content
-  div.container
-    div.row
-      h1.page-header= title
-    
-    div.row
-      button.btn.btn-default.btn-sm(onClick="initAddRow()")
-        span(aria-hidden="true") Add Resource
+  div.content-wrapper
+    div.container
+      div.row
+        - var start = new Date()
+        - start.setDate( new Date().getDate()-3);
+        - var end = new Date()
+        - end.setDate( new Date().getDate()+3);
+        - var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+        - var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-      button.btn.btn-default.btn-sm(onClick="initDelRow()")
-        span(aria-hidden="true") Delete Resource
-    br
-    div.row
-      #dp
+        
+        h1.page-header Week of #{days[start.getDay()]} #{start.getDate()}-#{months[start.getMonth()]}-#{start.getFullYear()} to #{days[end.getDay()]} #{end.getDate()}-#{months[end.getMonth()]}-#{end.getFullYear()}
+
+      div.row
+        button.btn.btn-default.btn-sm(onClick="initAddRow()")
+          span(aria-hidden="true") Add Resource
+
+        button.btn.btn-default.btn-sm(onClick="initDelRow()")
+          span(aria-hidden="true") Delete Resource
+      br
+      div.row
+        #dp
+      
+      br
+      div.row

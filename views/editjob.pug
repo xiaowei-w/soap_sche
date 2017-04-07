@@ -114,12 +114,12 @@ block content
         div.col-xs-3
           label(for='name') On start, run
         div.col-xs-9.pull-right
-          input#start_cmd.form-control(type='text', placeholder='Enter your command' name='start_cmd' value=param.start_cmd)
+          textarea#start_cmd.form-control(rows=2 placeholder='Enter your command' name='start_cmd')=param.start_cmd
       br
       div.row
         div.col-xs-3
           label(for='name') On end, run
         div.col-xs-9.pull-right
-          input#end_cmd.form-control(type='text', placeholder='Enter your command' name='end_cmd' value=param.end_cmd)
+          textarea#end_cmd.form-control(rows=2 placeholder='Enter your command' name='end_cmd')=param.end_cmd
       
       input.btn.btn-primary(type='submit',value='Submit')
