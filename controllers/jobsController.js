@@ -14,33 +14,51 @@ function createToJobInstance( crontab, job_param ) {
         util.format('{ job_id : %d, res_id : %d, job_name : %s}', job_param['id'], job_param['resource_id'], job_param['name'] ) );
     
 }
+function saveCronJobs() {
+    resources.getAllJobs(
+        function(err) {
+            res.status(404).send({ result: "ERROR", message:"Not Found" });
+        },
+        function(rows) {
+            var crontab = tasks.getCronTab();
+            // Remove all. Rewrite all jobs
+            var jobs = crontab.jobs({ comment: util.format('job_id') });
+            crontab.remove(jobs);
+            
+            for ( var idx=0; idx < rows.length ; ++idx ){
+                 var job = rows[idx];
+                 processCronWriting( job );
+            }
+        });
+}
 function processCronWriting(job_details) {
     var crontab = tasks.getCronTab();
-    var job_param = {   id: job_details['$job_id'], 
-                        cmd : job_details['$start_cmd'],
-                        min : parseInt(job_details['$start_min']), 
-                        hr : parseInt(job_details['$start_hr']),
-                        dow : JSON.parse(job_details['$start_dow']),
-                        resource_id : job_details['$resource_id'],
-                        name : job_details['$name']
+    var job_param = {   id: job_details['id'], 
+                        cmd : job_details['start_cmd'],
+                        min : job_details['start_min'], 
+                        hr : job_details['start_hr'],
+                        dow : JSON.parse(job_details['start_dow']).toString(),
+                        resource_id : job_details['resource_id'],
+                        name : job_details['name']
                     };
+    
     createToJobInstance( crontab, job_param );
 
-    if ( job_details['$end_cmd'].length > 0 ) {
-        var end_params = getEndTime(JSON.parse(job_details['$start_dow']), parseInt(job_details['$start_hr']),
-                        parseInt(job_details['$start_min']), parseInt(job_details['$duration_hr']), 
-                        parseInt(job_details['$duration_min']) ) ;
+    if ( job_details['end_cmd'].length > 0 ) {
+        var end_params = getEndTime( JSON.parse(job_details['start_dow']), job_details['start_hr'],
+                        job_details['start_min'], job_details['duration_hr'], 
+                        job_details['duration_min'] ) ;
         
-        job_param['cmd'] = job_details['$end_cmd'];
-        job_param['min'] = parseInt(end_params['$end_min']);
-        job_param['hr'] = parseInt(end_params['$end_hr']);
-        job_param['dow'] = end_params['$end_dow'];
+        job_param['cmd']    = job_details['end_cmd'];
+        job_param['min']    = end_params['end_min'];
+        job_param['hr']     = end_params['end_hr'];
+        job_param['dow']    = end_params['end_dow'];
         
         createToJobInstance( crontab, job_param );
     }
-    crontab.save(function(err, crontab) {});
-
+    crontab.save(function(err, crontab) { });
 }
+
 function getEndTime( dow_array, start_hr, start_min, duration_hr, duration_min ) {
     var date = new Date();
     var end_hr = NaN;
@@ -65,7 +83,7 @@ function getEndTime( dow_array, start_hr, start_min, duration_hr, duration_min )
     // console.log( end_hr );
     // console.log( end_min );
     
-    return { '$end_dow' : end_dow_array, '$end_hr' : end_hr, '$end_min' : end_min };
+    return { 'end_dow' : end_dow_array, 'end_hr' : end_hr, 'end_min' : end_min };
 }
 
 exports.ListAll = function( req, res, next ) {
@@ -149,7 +167,7 @@ exports.processAddJob = function( req, res, next ) {
                     job_details['$job_id'] = row;
 
                     if (config.enable_cron_write == 'true') {
-                        processCronWriting(job_details);
+                        saveCronJobs();
                     }
 
                     res.status(200).send({result:"OK", message:"Job Saved"});
@@ -240,17 +258,7 @@ exports.processUpdateJob = function( req, res, next ) {
                 function(new_row) {
                     // Update and save to system crontab
                     if (config.enable_cron_write == 'true') {
-                        
-                        var crontab = tasks.getCronTab();
-                        // Look for the jobs
-                        //console.log(row);
-                        var jobs = crontab.jobs({ comment: util.format('job_id : %d', row['id'] ) });
-
-                        crontab.remove(jobs);
-                        crontab.save(function(err, crontab) {});
-
-                        processCronWriting(job_details);
-                        
+                        saveCronJobs();
                     }
 
                     res.status(200).send({result:"OK", message:"Updated!"});
